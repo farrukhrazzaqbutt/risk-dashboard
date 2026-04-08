@@ -1,0 +1,36 @@
+[project]
+name = "risk-dashboard-backend"
+version = "0.1.0"
+description = "FastAPI backend for Risk Management Dashboard MVP"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi==0.111.0",
+  "uvicorn[standard]==0.30.1",
+  "pydantic==2.8.2",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "ruff>=0.8.0",
+  "flake8>=7.0",
+  "radon>=6.0",
+  "xenon>=0.9.1",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q --tb=short"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["app", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = []

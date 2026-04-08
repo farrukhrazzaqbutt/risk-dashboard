@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  backend:
+    name: Backend (Docker image — lint, tests, complexity)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build backend test image
+        run: docker build -f backend/Dockerfile.test -t risk-dashboard-backend-ci ./backend
+
+      - name: Ruff lint
+        run: docker run --rm risk-dashboard-backend-ci uv run ruff check app tests
+
+      - name: Ruff format (check only)
+        run: docker run --rm risk-dashboard-backend-ci uv run ruff format --check app tests
+
+      - name: Flake8
+        run: docker run --rm risk-dashboard-backend-ci uv run flake8 app tests
+
+      - name: Pytest
+        run: docker run --rm risk-dashboard-backend-ci uv run pytest tests/ -v
+
+      - name: Radon cyclomatic complexity (summary)
+        run: docker run --rm risk-dashboard-backend-ci uv run radon cc app -a -nb
+
+      - name: Radon maintainability index
+        run: docker run --rm risk-dashboard-backend-ci uv run radon mi app -nb
+
+      - name: Xenon complexity gate
+        run: docker run --rm risk-dashboard-backend-ci uv run xenon --max-absolute C --max-modules B --max-average A app

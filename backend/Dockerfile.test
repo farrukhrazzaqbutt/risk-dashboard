@@ -1,0 +1,14 @@
+# Test image: dev dependencies + pytest (not used for production runtime).
+FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN pip install --no-cache-dir uv
+
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --extra dev
+
+COPY app ./app
+COPY tests ./tests
+
+CMD ["uv", "run", "pytest", "tests/", "-v"]
