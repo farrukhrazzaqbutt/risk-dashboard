@@ -1,6 +1,6 @@
 ﻿# Risk Management Dashboard MVP
 
-A lightweight full-stack MVP that simulates market data and client trading activity, then streams real-time book and risk metrics to a browser dashboard.
+A lightweight full-stack MVP focused on real-time risk and exposure monitoring that simulates market data and client trading activity, then streams book and risk metrics to a browser dashboard.
 
 ## Project overview
 
@@ -24,6 +24,7 @@ This project demonstrates a practical risk/book monitoring loop:
   - metric cards (including realized / unrealized PnL), PnL curve, client PnL chart (full width of main column), live quotes strip, positions, recent trades (full page width)
   - browser console logging with a `[risk-dashboard]` prefix (see `frontend/src/logger.js`)
 - See **`ARCHITECTURE.md`** for flow, scalability knobs (`BROADCAST_INTERVAL_SEC`, `SIMULATION_LOAD_MULTIPLIER`), and explicit MVP simplifications.
+- See **`CONTRIBUTING.md`** for a documentation index and pre-PR checks.
 
 ## CI
 
@@ -83,7 +84,7 @@ Add `-d` to run detached in the background. Backend image respects `LOG_LEVEL` (
 - Frontend: `http://localhost:5173`
 - Backend: `http://localhost:8000`
 
-## Checklist before submit (for you / the reviewer)
+## Verifying it works
 
 - [ ] Clone fresh, then either **`docker compose up --build`** or backend `uv sync` + `uv run uvicorn …` and frontend `npm install` + `npm run dev`.
 - [ ] Open **`/docs`** on the backend for interactive API docs; confirm **`/health`**, **`/snapshot`**, and **`/ws`**.
@@ -99,6 +100,26 @@ Add `-d` to run detached in the background. Backend image respects `LOG_LEVEL` (
   - client sells -> we are long
 - Monetization is a simple spread-capture proxy
 - Client yield uses: `total_client_pnl / total_client_trade_count`
+
+## Trade-offs
+
+- In-memory state chosen for simplicity and low latency, at the cost of persistence and fault tolerance
+- Random simulation instead of market data feeds to keep scope manageable
+- WebSocket push model chosen over polling for real-time updates
+- No authentication/authorization implemented (out of scope for MVP)
+
+## Scaling considerations
+
+- Replace in-memory store with Redis or distributed cache
+- Introduce message broker (Kafka / RabbitMQ) for event-driven processing
+- Horizontal scaling via stateless API + shared state layer
+- Backpressure handling for high-frequency updates
+
+## Limitations
+
+- Not suitable for production trading environments
+- No latency guarantees or synchronization across components
+- Simplified PnL model (no fees, slippage, or advanced risk metrics)
 
 ## Possible future improvements
 
