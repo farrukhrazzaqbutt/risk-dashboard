@@ -34,7 +34,9 @@ uv run xenon --max-absolute C --max-modules B --max-average A app
 
 ### Same checks as CI (Docker, from repo root)
 
-CI builds `Dockerfile.test` and runs **ruff**, **flake8**, **pytest**, **radon**, and **xenon** inside that image. To mirror CI **before pushing** (no Docker Compose service — use plain Docker):
+CI builds `Dockerfile.test` and runs **ruff**, **flake8**, **pytest**, **radon**, and **xenon** inside that image. The image copies **`backend/.flake8`** so **flake8** uses `max-line-length = 100` (matching **ruff**), not the default 79.
+
+To mirror CI **before pushing** (no Docker Compose — use plain Docker):
 
 ```bash
 # From risk-dashboard/ (repository root)

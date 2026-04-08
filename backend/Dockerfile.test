@@ -5,7 +5,8 @@ WORKDIR /app
 
 RUN pip install --no-cache-dir uv
 
-COPY pyproject.toml uv.lock ./
+# Include .flake8 so flake8 uses max-line-length=100 (same as ruff) inside the image.
+COPY pyproject.toml uv.lock .flake8 ./
 RUN uv sync --frozen --extra dev
 
 COPY app ./app
