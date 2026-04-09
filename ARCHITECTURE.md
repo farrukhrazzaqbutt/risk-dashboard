@@ -24,7 +24,7 @@ This MVP is intentionally single-process and in-memory. If you turn up event rat
 
 **Not overbuilt:** no Redis/Kafka; throttling is a single sleep interval and back-pressure is “drop broken websocket clients.”
 
-## Simplifications (call out in interview)
+## Simplifications
 
 - **Cross-currency / notionals:** `notional_by_instrument` uses `|qty| × mid` as a **single-currency style proxy** across symbols (acceptable for an MVP; production would normalize to a reporting currency).
 - **Client PnL:** follows the same simplified client-side accumulation used for **client yield** in the README—defensible as a demo, not a regulatory PnL report.
