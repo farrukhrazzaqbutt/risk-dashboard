@@ -8,6 +8,7 @@ This project is documented in Markdown throughout the repository (per task guida
 |----------|---------|
 | [README.md](README.md) | Overview, setup, Docker, CI, trade-offs, limitations |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Data flow, scalability knobs, MVP simplifications |
+| [AGENTS.md](AGENTS.md) | Guidance for AI-assisted work and reviewer expectations |
 | [backend/README.md](backend/README.md) | API, logging, tunables, tests, Docker-based CI parity |
 
 ## Before opening a PR
