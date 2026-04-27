@@ -1,6 +1,9 @@
 ﻿# Backend Notes
 
-The backend is a FastAPI service that simulates market prices and client trades in memory.
+The backend is a FastAPI service with two deployment modes:
+
+- **In-process (default):** no `REDIS_URL` set — a single Uvicorn process runs the simulators and WebSocket fan-out in memory.
+- **Redis + Celery:** with `REDIS_URL` set — a **Celery worker** runs price/trade simulation and writes snapshots to Redis; Uvicorn serves HTTP/WebSocket and streams JSON from Redis. Use **one** worker process for simulation (see `docker-compose` worker: `--pool=solo`).
 
 ## Dependency management with uv
 
@@ -76,19 +79,28 @@ GitHub Actions: `../.github/workflows/ci.yml`.
   - Windows PowerShell: `$env:LOG_LEVEL="DEBUG"; python -m uv run uvicorn app.main:app --reload`
 - `GET /snapshot` is logged at **DEBUG** only (avoids log spam).
 
+## Celery + Redis (optional)
+
+1. Start Redis (e.g. `docker run -p 6379:6379 redis:7-alpine`).
+2. In one shell (from `backend/`), with `REDIS_URL` set:
+
+   `REDIS_URL=redis://127.0.0.1:6379/0` (or Windows PowerShell: `$env:REDIS_URL="redis://127.0.0.1:6379/0"`)
+3. `python -m uv run celery -A app.celery_app worker -l info --pool=solo`
+4. In another: `python -m uv run uvicorn app.main:app --reload`
+
+`docker compose` from the repo root runs `redis`, `worker`, and `backend` with `REDIS_URL` set.
+
 ## Endpoints
 
-- `GET /health` - simple health probe
+- `GET /health` - liveness; in redis mode the API also `PING`s Redis
 - `GET /snapshot` - current dashboard snapshot JSON
-- `WS /ws` - pushes snapshot updates every 500ms
+- `WS /ws` - pushes snapshot updates (interval `BROADCAST_INTERVAL_SEC`, default 0.5s)
 
 ## Simulation loops
 
-On startup, three async tasks are spawned:
+**In-process:** on startup, Uvicorn spawns three asyncio tasks: price, trades, in-memory WebSocket fan-out.
 
-1. Price simulation loop (200ms): random walk mid price + bid/ask rebuild from spread
-2. Trade simulation loop (~150-800ms): random client trade events
-3. Broadcast loop (500ms): emits full snapshot to connected websocket clients
+**Celery + Redis:** the worker spawns: price, trades, Redis snapshot write loop; Uvicorn spawns: WebSocket fan-out that reads the latest JSON from Redis.
 
 ## Simplified metrics
 

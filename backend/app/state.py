@@ -5,8 +5,6 @@ import logging
 from collections import deque
 from datetime import UTC, datetime
 
-from fastapi import WebSocket
-
 from .models import (
     DashboardSnapshot,
     InstrumentConfig,
@@ -51,8 +49,6 @@ class BookState:
         self.next_trade_id = 1
         self.clients_total_pnl: dict[str, float] = {c: 0.0 for c in clients}
         self.clients_trade_count: dict[str, int] = {c: 0 for c in clients}
-
-        self.connections: set[WebSocket] = set()
 
         logger.info(
             "BookState initialized | instruments=%d | clients=%d | "

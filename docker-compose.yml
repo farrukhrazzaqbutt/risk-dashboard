@@ -1,12 +1,32 @@
 ﻿services:
+  redis:
+    image: redis:7-alpine
+    container_name: risk-dashboard-redis
+    # No host port: backend/worker use the Docker network only (avoids clashing with a local Redis on 6379).
+
+  worker:
+    build:
+      context: ./backend
+    container_name: risk-dashboard-worker
+    command: ["uv", "run", "celery", "-A", "app.celery_app", "worker", "-l", "info", "--pool=solo"]
+    environment:
+      - LOG_LEVEL=INFO
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+
   backend:
     build:
       context: ./backend
     container_name: risk-dashboard-backend
     environment:
       - LOG_LEVEL=INFO
+      - REDIS_URL=redis://redis:6379/0
     ports:
       - "8000:8000"
+    depends_on:
+      - redis
+      - worker
 
   frontend:
     build:
